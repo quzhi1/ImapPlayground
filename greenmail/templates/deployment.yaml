@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greenmail
+spec:
+  selector:
+    matchLabels:
+      app: greenmail
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: greenmail
+    spec:
+      containers:
+        - name: greenmail
+          image: greenmail/standalone:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: imap
+              containerPort: 3143
+              protocol: TCP
+            - name: api
+              containerPort: 8080
+              protocol: TCP
+          resources: {}
