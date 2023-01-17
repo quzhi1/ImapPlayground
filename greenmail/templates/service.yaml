@@ -4,9 +4,9 @@ metadata:
     name: "greenmail"
 spec:
   ports:
-    - name: "3143"
-      port: 3143
-      targetPort: 3143
+    - name: "3993"
+      port: 3993
+      targetPort: 3993
     - name: "8080"
       port: 8080
       targetPort: 8080

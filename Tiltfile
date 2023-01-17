@@ -11,6 +11,6 @@ compile_opt = 'GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=amd64 '
 helm_resource(
   'greenmail',
   'greenmail',
-  port_forwards=["3143:3143", "8080:8080"],
+  port_forwards=["3993:3993", "8080:8080"],
   labels='greenmail',
 )
