@@ -7,7 +7,7 @@ compile_opt = 'GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=amd64 '
 
 ##################### GreenMail #####################
 
-# Spin up pubsub
+# Spin up greenmail
 helm_resource(
   'greenmail',
   'greenmail',
