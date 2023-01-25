@@ -36,6 +36,8 @@ tag login test@localhost test
 
 ## Some example command
 ```bash
+# See available commands
+tag CAPABILITY
 # List folders
 tag LIST "" "*"
 # Select folders
@@ -53,6 +55,8 @@ tag FETCH 10 (BODY)
 tag FETCH 6388 (BODY[0])
 # Log out
 tag LOGOUT
+# IDLE
+tag IDLE
 ```
 
 ## Run proof of concept
