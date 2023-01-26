@@ -51,6 +51,8 @@ tag STATUS Archive (MESSAGES)
 tag FETCH 10:10 (BODY[HEADER])
 # Check the 10th message
 tag FETCH 10 (BODY)
+# List MIME for 10th message
+tag FETCH 10 (BODY[HEADER])
 # Check the 10th message, part 0
 tag FETCH 6388 (BODY[0])
 # Log out
