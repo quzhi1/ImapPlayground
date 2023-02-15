@@ -46,7 +46,7 @@ func idle(username, password string) {
 	c.Updates = updates
 
 	// Start idling
-	stopped := false
+	// stopped := false
 	stop := make(chan struct{})
 	done := make(chan error, 1)
 	go func() {
@@ -58,10 +58,10 @@ func idle(username, password string) {
 		select {
 		case update := <-updates:
 			log.Println("New update:", update)
-			if !stopped {
-				close(stop)
-				stopped = true
-			}
+			// if !stopped {
+			// 	close(stop)
+			// 	stopped = true
+			// }
 		case err := <-done:
 			if err != nil {
 				log.Fatal(err)
