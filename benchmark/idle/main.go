@@ -57,17 +57,34 @@ func idle(username, password string) {
 	for {
 		select {
 		case update := <-updates:
-			log.Println("New update:", update)
+			switch typedUpdate := update.(type) {
+			case *client.StatusUpdate:
+				log.Printf(
+					"New status update, tag: %s, type: %s, code: %s, info: %s\n",
+					typedUpdate.Status.Tag,
+					typedUpdate.Status.Type,
+					typedUpdate.Status.Code,
+					typedUpdate.Status.Info,
+				)
+			case *client.MailboxUpdate:
+				log.Printf("New mailbox update, mailboxName: %s\n", typedUpdate.Mailbox.Name)
+			case *client.ExpungeUpdate:
+				log.Printf("New expunge update, seqNum: %d\n", typedUpdate.SeqNum)
+			case *client.MessageUpdate:
+				log.Printf("New message update, messageUID: %d\n", typedUpdate.Message.Uid)
+			default:
+				log.Printf("Unknown update: %v\n", typedUpdate)
+			}
 			// if !stopped {
 			// 	close(stop)
 			// 	stopped = true
 			// }
 		case err := <-done:
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("Got error: %v\n", err)
 			}
-			log.Println("Not idling anymore")
-			return
+			log.Println("Try idling again")
+			idle(username, password)
 		}
 	}
 }
