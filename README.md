@@ -32,6 +32,7 @@ curl -L -X POST 'localhost:8080/api/user' \
 openssl s_client -connect localhost:3993 -crlf -quiet
 # Command line will hang
 tag login test@localhost test
+tag login user-a@localhost user-a
 ```
 
 ## Some example command
@@ -47,6 +48,8 @@ tag SELECT Archive
 # Count messages in folder
 tag STATUS INBOX (MESSAGES)
 tag STATUS Archive (MESSAGES)
+# Change flags
+tag STORE 1 +FLAGS (\abc)
 # Check last 10 messages
 tag FETCH 10:10 (BODY[HEADER])
 # Check the 10th message
