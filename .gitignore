@@ -15,4 +15,5 @@
 # vendor/
 
 tmp.txt
+tmp-attachment.txt
 *.csv
