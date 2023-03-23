@@ -122,6 +122,7 @@ func main() {
 
 			switch h := p.Header.(type) {
 			case *mail.InlineHeader:
+				log.Ctx(ctx).Info().Msgf("Got text Content-Type: %s", h.Header.Header.Get("Content-Type"))
 				// This is the message's text (can be plain-text or HTML)
 				b, _ := io.ReadAll(p.Body)
 				log.Ctx(ctx).Info().Msgf("Got text: %v", string(b))
