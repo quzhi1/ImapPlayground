@@ -111,6 +111,9 @@ func main() {
 			log.Ctx(ctx).Info().Msgf("Subject: %s", subject)
 		}
 
+		// Print internal date
+		log.Ctx(ctx).Info().Msgf("InternalDate: %s", msg.InternalDate)
+
 		// Process each message's part
 		for {
 			p, err := mr.NextPart()
