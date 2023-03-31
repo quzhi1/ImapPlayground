@@ -68,8 +68,14 @@ func main() {
 	log.Ctx(ctx).Debug().Msgf("Fetching messages: %v", uids)
 	seqset := new(imap.SeqSet)
 	seqset.AddNum(uids...)
-	var section imap.BodySectionName
-	items := []imap.FetchItem{section.FetchItem()}
+	// Setting peek to true will prevent marking the messages as read
+	section := imap.BodySectionName{Peek: true}
+	items := []imap.FetchItem{
+		imap.FetchEnvelope,
+		imap.FetchFlags,
+		imap.FetchInternalDate,
+		section.FetchItem(),
+	}
 	messageChans := make(chan *imap.Message, 10)
 	done := make(chan error, 1)
 	go func() {
@@ -97,19 +103,17 @@ func main() {
 		}
 
 		// Print some info about the message
-		header := mr.Header
-		if date, err := header.Date(); err == nil {
-			log.Ctx(ctx).Info().Msgf("Date: %s", date)
-		}
-		if from, err := header.AddressList("From"); err == nil {
-			log.Ctx(ctx).Info().Msgf("From: %s", from)
-		}
-		if to, err := header.AddressList("To"); err == nil {
-			log.Ctx(ctx).Info().Msgf("To: %s", to)
-		}
-		if subject, err := header.Subject(); err == nil {
-			log.Ctx(ctx).Info().Msgf("Subject: %s", subject)
-		}
+		log.Ctx(ctx).Info().Msgf("MessageId: %s", msg.Envelope.MessageId)
+		log.Ctx(ctx).Info().Msgf("Date: %s", msg.Envelope.Date)
+		log.Ctx(ctx).Info().Msgf("From: %s", msg.Envelope.From)
+		log.Ctx(ctx).Info().Msgf("Sender: %s", msg.Envelope.Sender)
+		log.Ctx(ctx).Info().Msgf("To: %s", msg.Envelope.To)
+		log.Ctx(ctx).Info().Msgf("Cc: %s", msg.Envelope.Cc)
+		log.Ctx(ctx).Info().Msgf("Bcc: %s", msg.Envelope.Bcc)
+		log.Ctx(ctx).Info().Msgf("ReplyTo: %s", msg.Envelope.ReplyTo)
+		log.Ctx(ctx).Info().Msgf("Subject: %s", msg.Envelope.Subject)
+
+		log.Ctx(ctx).Info().Strs("flags", msg.Flags).Msg("List flags")
 
 		// Print internal date
 		log.Ctx(ctx).Info().Msgf("InternalDate: %s", msg.InternalDate)
