@@ -14,6 +14,10 @@ func main() {
 	password := os.Getenv("YAHOO_APP_PASSWORD")
 
 	// Connect
+	// option := &imapclient.Options{
+	// 	DebugWriter: os.Stdout,
+	// }
+	// c, err := imapclient.DialTLS("imap.mail.yahoo.com:993", option)
 	c, err := imapclient.DialTLS("imap.mail.yahoo.com:993", nil)
 	if err != nil {
 		log.Fatalf("failed to dial IMAP server: %v", err)
