@@ -18,7 +18,7 @@ import (
 const (
 	// imapAddress = "imap.mail.yahoo.com:993"
 	imapAddress = "imap.mail.me.com:993"
-	folderName  = "Sent"
+	folderName  = "Sent Messages"
 	syncPeriod  = 30 * 24 * time.Hour
 )
 
