@@ -10,15 +10,18 @@ import (
 
 func main() {
 	// Read auth
-	username := os.Getenv("YAHOO_EMAIL_ADDRESS")
-	password := os.Getenv("YAHOO_APP_PASSWORD")
+	// username := os.Getenv("YAHOO_EMAIL_ADDRESS")
+	// password := os.Getenv("YAHOO_APP_PASSWORD")
+	username := os.Getenv("ICLOUD_EMAIL_ADDRESS")
+	password := os.Getenv("ICLOUD_APP_PASSWORD")
 
 	// Connect
-	// option := &imapclient.Options{
-	// 	DebugWriter: os.Stdout,
-	// }
+	option := &imapclient.Options{
+		DebugWriter: os.Stdout,
+	}
 	// c, err := imapclient.DialTLS("imap.mail.yahoo.com:993", option)
-	c, err := imapclient.DialTLS("imap.mail.yahoo.com:993", nil)
+	// c, err := imapclient.DialTLS("imap.mail.yahoo.com:993", nil)
+	c, err := imapclient.DialTLS("imap.mail.me.com:993", option)
 	if err != nil {
 		log.Fatalf("failed to dial IMAP server: %v", err)
 	}
@@ -40,11 +43,11 @@ func main() {
 	}
 
 	// Select INBOX
-	selectedMbox, err := c.Select("INBOX").Wait()
+	selectedMbox, err := c.Select("Inbox").Wait()
 	if err != nil {
-		log.Fatalf("failed to select INBOX: %v", err)
+		log.Fatalf("failed to select Inbox: %v", err)
 	}
-	log.Printf("INBOX contains %v messages", selectedMbox.NumMessages)
+	log.Printf("Inbox contains %v messages", selectedMbox.NumMessages)
 
 	// Fetch first message in INBOX
 	if selectedMbox.NumMessages > 0 {
