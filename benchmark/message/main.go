@@ -16,8 +16,9 @@ import (
 )
 
 const (
-	imapAddress = "imap.mail.yahoo.com:993"
-	folderName  = "Inbox"
+	// imapAddress = "imap.mail.yahoo.com:993"
+	imapAddress = "imap.mail.me.com:993"
+	folderName  = "Sent"
 	syncPeriod  = 30 * 24 * time.Hour
 )
 
@@ -32,8 +33,10 @@ func main() {
 	ctx := logger.WithContext(context.Background())
 
 	// Read auth
-	username := os.Getenv("YAHOO_EMAIL_ADDRESS")
-	password := os.Getenv("YAHOO_APP_PASSWORD")
+	// username := os.Getenv("YAHOO_EMAIL_ADDRESS")
+	// password := os.Getenv("YAHOO_APP_PASSWORD")
+	username := os.Getenv("ICLOUD_EMAIL_ADDRESS")
+	password := os.Getenv("ICLOUD_APP_PASSWORD")
 
 	// Connect to imap server
 	log.Ctx(ctx).Debug().Msgf("Connecting to IMAP server %s", imapAddress)
@@ -48,8 +51,14 @@ func main() {
 	}
 	log.Ctx(ctx).Debug().Str("username", username).Msg("Logged in to IMAP server")
 
+	// List folders
+	folders := listFolder(ctx, imapClient)
+	for _, folder := range folders {
+		log.Ctx(ctx).Info().Msgf("Found folder %v", folder.Name)
+	}
+
 	// Select folder
-	folder, err := imapClient.Select(folderName, false)
+	folder, err := imapClient.Select(folderName, true)
 	if err != nil {
 		panic(err)
 	}
@@ -65,6 +74,10 @@ func main() {
 	}
 
 	// Get messages
+	if len(uids) == 0 {
+		log.Ctx(ctx).Debug().Msg("No messages to fetch")
+		return
+	}
 	log.Ctx(ctx).Debug().Msgf("Fetching messages: %v", uids)
 	seqset := new(imap.SeqSet)
 	seqset.AddNum(uids...)
@@ -154,4 +167,22 @@ func main() {
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Error logging out of IMAP server. We will directly close the connection")
 	}
+}
+
+func listFolder(ctx context.Context, client *client.Client) []imap.MailboxInfo {
+	mailboxes := make(chan *imap.MailboxInfo, 10)
+	done := make(chan error, 1)
+	go func() {
+		done <- client.List("", "*", mailboxes)
+	}()
+
+	if err := <-done; err != nil {
+		log.Ctx(ctx).Err(err).Msg("Error for listing folders")
+	}
+
+	result := []imap.MailboxInfo{}
+	for m := range mailboxes {
+		result = append(result, *m)
+	}
+	return result
 }
