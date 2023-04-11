@@ -54,7 +54,7 @@ func main() {
 	// List folders
 	folders := listFolder(ctx, imapClient)
 	for _, folder := range folders {
-		log.Ctx(ctx).Info().Msgf("Found folder %v", folder.Name)
+		log.Ctx(ctx).Info().Msgf("Found folder %s, flag %v", folder.Name, folder.Attributes)
 	}
 
 	// Select folder

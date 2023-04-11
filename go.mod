@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/emersion/go-imap v1.2.1
-	github.com/emersion/go-imap/v2 v2.0.0-alpha.2.0.20230405210804-c3a0eed56682
+	github.com/emersion/go-imap/v2 v2.0.0-alpha.2.0.20230406085549-33d7b6e9bc71
 	github.com/emersion/go-message v0.16.0
 	github.com/rs/zerolog v1.29.0
 )
