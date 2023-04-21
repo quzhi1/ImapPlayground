@@ -16,3 +16,4 @@
 
 tmp*.txt
 *.csv
+.DS_Store
