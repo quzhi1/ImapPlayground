@@ -48,6 +48,8 @@ tag SELECT Archive
 # Count messages in folder
 tag STATUS INBOX (MESSAGES)
 tag STATUS Archive (MESSAGES)
+# List all UIDs
+tag uid search all
 # Change flags
 tag STORE 1 +FLAGS (\abc)
 # Check last 10 messages
