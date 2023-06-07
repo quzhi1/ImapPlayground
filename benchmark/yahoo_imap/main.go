@@ -117,12 +117,12 @@ func main() {
 		// Print some info about the message
 		log.Ctx(ctx).Info().Msgf("MessageId: %s", msg.Envelope.MessageId)
 		log.Ctx(ctx).Info().Msgf("Date: %s", msg.Envelope.Date)
-		log.Ctx(ctx).Info().Msgf("From: %s", msg.Envelope.From)
-		log.Ctx(ctx).Info().Msgf("Sender: %s", msg.Envelope.Sender)
-		log.Ctx(ctx).Info().Msgf("To: %s", msg.Envelope.To)
-		log.Ctx(ctx).Info().Msgf("Cc: %s", msg.Envelope.Cc)
-		log.Ctx(ctx).Info().Msgf("Bcc: %s", msg.Envelope.Bcc)
-		log.Ctx(ctx).Info().Msgf("ReplyTo: %s", msg.Envelope.ReplyTo)
+		log.Ctx(ctx).Info().Msgf("From: %v", msg.Envelope.From)
+		log.Ctx(ctx).Info().Msgf("Sender: %v", msg.Envelope.Sender)
+		log.Ctx(ctx).Info().Msgf("To: %v", msg.Envelope.To)
+		log.Ctx(ctx).Info().Msgf("Cc: %v", msg.Envelope.Cc)
+		log.Ctx(ctx).Info().Msgf("Bcc: %v", msg.Envelope.Bcc)
+		log.Ctx(ctx).Info().Msgf("ReplyTo: %v", msg.Envelope.ReplyTo)
 		log.Ctx(ctx).Info().Msgf("Subject: %s", msg.Envelope.Subject)
 
 		log.Ctx(ctx).Info().Strs("flags", msg.Flags).Msg("List flags")
