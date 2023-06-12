@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"os"
-	"time"
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
@@ -13,19 +12,13 @@ import (
 )
 
 var (
-	// username = os.Getenv("YAHOO_EMAIL_ADDRESS")
-	// password = os.Getenv("YAHOO_APP_PASSWORD")
 	username = os.Getenv("ICLOUD_EMAIL_ADDRESS_MANY_MESSAGES")
 	password = os.Getenv("ICLOUD_APP_PASSWORD_MANY_MESSAGES")
 )
 
 const (
-	// imapAddress = "imap.mail.yahoo.com:993"
 	imapAddress = "imap.mail.me.com:993"
 	folderName  = "INBOX"
-	syncPeriod  = 90 * 24 * time.Hour
-	// HTMLContentType      = "text/html"
-	// PlainTextContentType = "text/plain"
 )
 
 func main() {
