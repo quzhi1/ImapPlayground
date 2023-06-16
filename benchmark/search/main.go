@@ -54,8 +54,9 @@ func search(username, password string) {
 	start = time.Now().UnixMilli()
 	criteria := &imap.SearchCriteria{
 		SentSince: time.Now().AddDate(0, 0, -30),
+		// SentSince: time.Unix(1686872891, 0),
 	}
-	criteria.Not = []*imap.SearchCriteria{}
+	// criteria.Not = []*imap.SearchCriteria{}
 	// for _, exclude := range []string{"bank", "confidential"} {
 	// 	subjectInclude := imap.SearchCriteria{Header: textproto.MIMEHeader{"Subject": {exclude}}}
 	// 	criteria.Not = append(criteria.Not, &subjectInclude)
@@ -108,6 +109,6 @@ func search(username, password string) {
 			log.Printf("Server didn't returned message")
 			break
 		}
-		log.Printf("MessageId: %s, subject: %s", msg.Envelope.MessageId, msg.Envelope.Subject)
+		log.Printf("MessageId: %s, subject: %s, date: %d", msg.Envelope.MessageId, msg.Envelope.Subject, msg.Envelope.Date.Unix())
 	}
 }
