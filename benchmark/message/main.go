@@ -19,6 +19,7 @@ import (
 
 var (
 	contentTypeRegex = regexp.MustCompile(".*name=\"(\\S+)\"")
+	multipartError   = "multipart: NextPart: EOF"
 	// username = os.Getenv("YAHOO_EMAIL_ADDRESS")
 	// password = os.Getenv("YAHOO_APP_PASSWORD")
 	username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
@@ -133,7 +134,21 @@ func main() {
 			if err == io.EOF {
 				break
 			} else if err != nil {
-				panic(err)
+				shouldBreak := false
+				switch {
+				case message.IsUnknownCharset(err):
+					log.Ctx(ctx).Warn().Err(err).Msg("Ignore unknown charset")
+				case strings.Contains(err.Error(), multipartError):
+					log.Ctx(ctx).Warn().Err(err).Msg("Ignore multipart error")
+					shouldBreak = true
+				default:
+					log.Ctx(ctx).Error().Err(err).Msg("Error reading message part")
+					panic(err)
+				}
+
+				if shouldBreak {
+					break
+				}
 			}
 
 			switch partHeader := part.Header.(type) {
@@ -157,6 +172,7 @@ func main() {
 
 	// Logout
 	err = imapClient.Logout()
+	log.Ctx(ctx).Debug().Msg("Logged out of IMAP server")
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Error logging out of IMAP server. We will directly close the connection")
 	}
