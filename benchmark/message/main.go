@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"io"
 	"os"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
@@ -20,6 +20,7 @@ import (
 var (
 	contentTypeRegex = regexp.MustCompile(".*name=\"(\\S+)\"")
 	multipartError   = "multipart: NextPart: EOF"
+	encodingError    = "encoding error"
 	// username = os.Getenv("YAHOO_EMAIL_ADDRESS")
 	// password = os.Getenv("YAHOO_APP_PASSWORD")
 	username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
@@ -28,14 +29,11 @@ var (
 
 const (
 	// imapAddress = "imap.mail.yahoo.com:993"
-	imapAddress = "imap.mail.me.com:993"
-	folderName  = "Hello"
-	// folderName           = "Drafts"
-	syncPeriod           = 30 * 24 * time.Hour
+	imapAddress          = "imap.mail.me.com:993"
+	folderName           = "Drafts"
 	HTMLContentType      = "text/html"
 	PlainTextContentType = "text/plain"
-	uid                  = 6
-	// uid = 10
+	uid                  = 14
 )
 
 func main() {
@@ -131,23 +129,19 @@ func main() {
 		// Process each message's part
 		for {
 			part, err := mr.NextPart()
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				break
 			} else if err != nil {
-				shouldBreak := false
 				switch {
 				case message.IsUnknownCharset(err):
 					log.Ctx(ctx).Warn().Err(err).Msg("Ignore unknown charset")
 				case strings.Contains(err.Error(), multipartError):
 					log.Ctx(ctx).Warn().Err(err).Msg("Ignore multipart error")
-					shouldBreak = true
+				case strings.Contains(err.Error(), encodingError):
+					log.Ctx(ctx).Warn().Err(err).Msg("Ignore encoding error")
 				default:
 					log.Ctx(ctx).Error().Err(err).Msg("Error reading message part")
 					panic(err)
-				}
-
-				if shouldBreak {
-					break
 				}
 			}
 
@@ -179,7 +173,7 @@ func main() {
 }
 
 func listFolder(ctx context.Context, client *client.Client) []imap.MailboxInfo {
-	mailboxes := make(chan *imap.MailboxInfo, 10)
+	mailboxes := make(chan *imap.MailboxInfo, 50)
 	done := make(chan error, 1)
 	go func() {
 		done <- client.List("", "*", mailboxes)
