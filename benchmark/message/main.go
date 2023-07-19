@@ -19,12 +19,14 @@ import (
 
 var (
 	contentTypeRegex = regexp.MustCompile(".*name=\"(\\S+)\"")
-	multipartError   = "multipart: NextPart: EOF"
+	multipartError   = "multipart:"
 	encodingError    = "encoding error"
 	// username = os.Getenv("YAHOO_EMAIL_ADDRESS")
 	// password = os.Getenv("YAHOO_APP_PASSWORD")
-	username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
-	password = os.Getenv("ICLOUD_APP_PASSWORD")
+	// username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
+	// password = os.Getenv("ICLOUD_APP_PASSWORD")
+	username = "nylas.sdet@icloud.com"
+	password = "assu-ndrx-lpzq-xjjg"
 )
 
 const (
@@ -33,7 +35,7 @@ const (
 	folderName           = "Drafts"
 	HTMLContentType      = "text/html"
 	PlainTextContentType = "text/plain"
-	uid                  = 14
+	uid                  = 39
 )
 
 func main() {
@@ -132,16 +134,23 @@ func main() {
 			if errors.Is(err, io.EOF) {
 				break
 			} else if err != nil {
+				shouldBreak := false
 				switch {
 				case message.IsUnknownCharset(err):
 					log.Ctx(ctx).Warn().Err(err).Msg("Ignore unknown charset")
 				case strings.Contains(err.Error(), multipartError):
 					log.Ctx(ctx).Warn().Err(err).Msg("Ignore multipart error")
+					shouldBreak = true
 				case strings.Contains(err.Error(), encodingError):
 					log.Ctx(ctx).Warn().Err(err).Msg("Ignore encoding error")
+					shouldBreak = true
 				default:
 					log.Ctx(ctx).Error().Err(err).Msg("Error reading message part")
 					panic(err)
+				}
+
+				if shouldBreak {
+					break
 				}
 			}
 
