@@ -35,7 +35,7 @@ const (
 	folderName           = "Drafts"
 	HTMLContentType      = "text/html"
 	PlainTextContentType = "text/plain"
-	uid                  = 39
+	uid                  = 50
 )
 
 func main() {
