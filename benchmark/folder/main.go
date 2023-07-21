@@ -49,11 +49,20 @@ func main() {
 	defer imapClient.Logout()
 	mailboxesChan := make(chan *imap.MailboxInfo, 10)
 	go imapClient.List("", "*", mailboxesChan)
+	var folderStatus *imap.MailboxStatus
 	for {
 		select {
 		case mailbox, ok := <-mailboxesChan:
 			if ok {
-				log.Ctx(ctx).Info().Str("folder", mailbox.Name).Strs("attributes", mailbox.Attributes).Msg("Found folder")
+				folderStatus, err = imapClient.Select(mailbox.Name, true)
+				if err != nil {
+					panic(err)
+				}
+				log.Ctx(ctx).Info().
+					Str("folder", mailbox.Name).
+					Strs("attributes", mailbox.Attributes).
+					Uint32("uid_next", folderStatus.UidNext).
+					Msg("Found folder")
 			} else {
 				return
 			}
