@@ -23,8 +23,8 @@ var (
 	encodingError    = "encoding error"
 	// username = os.Getenv("YAHOO_EMAIL_ADDRESS")
 	// password = os.Getenv("YAHOO_APP_PASSWORD")
-	// username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
-	// password = os.Getenv("ICLOUD_APP_PASSWORD")
+	//username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
+	//password = os.Getenv("ICLOUD_APP_PASSWORD")
 	username = "nylas.sdet@icloud.com"
 	password = "assu-ndrx-lpzq-xjjg"
 )
@@ -112,6 +112,12 @@ func main() {
 			panic(err)
 		}
 
+		// Print email headers
+		headerMap := mr.Header.Header.Map()
+		for key, value := range headerMap {
+			log.Ctx(ctx).Info().Str("key", key).Str("value", strings.Join(value, ",")).Msg("Raw header")
+		}
+
 		// Print some info about the message
 		log.Ctx(ctx).Info().Msgf("MessageId: %s", msg.Envelope.MessageId)
 		log.Ctx(ctx).Info().Msgf("Date: %s", msg.Envelope.Date)
@@ -192,7 +198,7 @@ func listFolder(ctx context.Context, client *client.Client) []imap.MailboxInfo {
 		log.Ctx(ctx).Err(err).Msg("Error for listing folders")
 	}
 
-	result := []imap.MailboxInfo{}
+	var result []imap.MailboxInfo
 	for m := range mailboxes {
 		result = append(result, *m)
 	}
