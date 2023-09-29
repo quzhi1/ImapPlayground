@@ -46,9 +46,19 @@ func main() {
 	log.Ctx(ctx).Debug().Str("username", username).Msg("Logged in to IMAP server")
 
 	// List folders
-	defer imapClient.Logout()
+	defer func(imapClient *client.Client) {
+		err = imapClient.Logout()
+		if err != nil {
+			panic(err)
+		}
+	}(imapClient)
 	mailboxesChan := make(chan *imap.MailboxInfo, 10)
-	go imapClient.List("", "*", mailboxesChan)
+	go func() {
+		err = imapClient.List("", "*", mailboxesChan)
+		if err != nil {
+			panic(err)
+		}
+	}()
 	var folderStatus *imap.MailboxStatus
 	for {
 		select {
@@ -62,6 +72,8 @@ func main() {
 					Str("folder", mailbox.Name).
 					Strs("attributes", mailbox.Attributes).
 					Uint32("uid_next", folderStatus.UidNext).
+					Uint32("totalCount", folderStatus.Messages).
+					Uint32("unreadCount", folderStatus.Unseen).
 					Msg("Found folder")
 			} else {
 				return
