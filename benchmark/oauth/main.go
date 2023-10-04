@@ -16,9 +16,11 @@ import (
 )
 
 const (
-	imapAddress = "imap.mail.yahoo.com:993"
+	//imapAddress = "imap.mail.yahoo.com:993"
+	imapAddress = "outlook.office365.com:993"
 	folderName  = "INBOX"
-	username    = "ps_21_69@yahoo.com"
+	//username    = "ps_21_69@yahoo.com"
+	username    = "nylastestapp2@nylasoffice365.com"
 	accessToken = "" // Fill me
 )
 
