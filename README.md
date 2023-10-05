@@ -41,6 +41,7 @@ tag login user-a@localhost user-a
 tag CAPABILITY
 # List folders
 tag LIST "" "*"
+tag LIST "" "%"
 # Select folders
 tag SELECT INBOX
 tag SELECT Inbox

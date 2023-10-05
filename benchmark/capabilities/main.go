@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"os"
 
-	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -45,41 +44,9 @@ func main() {
 	}
 	log.Ctx(ctx).Debug().Str("username", username).Msg("Logged in to IMAP server")
 
-	// List folders
-	defer func(imapClient *client.Client) {
-		err = imapClient.Logout()
-		if err != nil {
-			panic(err)
-		}
-	}(imapClient)
-	mailboxesChan := make(chan *imap.MailboxInfo, 100)
-	go func() {
-		err = imapClient.List("", "%", mailboxesChan)
-		if err != nil {
-			panic(err)
-		}
-	}()
-	var folderStatus *imap.MailboxStatus
-	for {
-		select {
-		case mailbox, ok := <-mailboxesChan:
-			if ok {
-				folderStatus, err = imapClient.Select(mailbox.Name, true)
-				if err != nil {
-					panic(err)
-				}
-				log.Ctx(ctx).Info().
-					Str("folder", mailbox.Name).
-					Strs("attributes", mailbox.Attributes).
-					Uint32("uid_next", folderStatus.UidNext).
-					Uint32("totalCount", folderStatus.Messages).
-					Uint32("unreadCount", folderStatus.Unseen).
-					Msg("Found folder")
-			} else {
-				return
-			}
-		default:
-			continue
-		}
+	// Check capabilities
+	caps, err := imapClient.Capability()
+	for capability, isSupported := range caps {
+		log.Ctx(ctx).Debug().Msgf("Capability %s: %v", capability, isSupported)
 	}
 }

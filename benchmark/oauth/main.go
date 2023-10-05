@@ -3,25 +3,23 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"github.com/emersion/go-message/mail"
+	"github.com/quzhi1/go-imap"
+	"github.com/quzhi1/go-imap/client"
+	"github.com/quzhi1/go-sasl"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"io"
 	"os"
 	"strings"
-
-	"github.com/emersion/go-imap"
-	"github.com/emersion/go-imap/client"
-	"github.com/emersion/go-message/mail"
-	"github.com/emersion/go-sasl"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 const (
-	//imapAddress = "imap.mail.yahoo.com:993"
-	imapAddress = "outlook.office365.com:993"
-	folderName  = "INBOX"
-	//username    = "ps_21_69@yahoo.com"
-	username    = "nylastestapp2@nylasoffice365.com"
-	accessToken = "" // Fill me
+	imapAddress = "imap.mail.yahoo.com:993"
+	folderName  = "Inbox"
+	username    = "ps_21_69@yahoo.com"
+	// Fill it with your own access token
+	accessToken = ""
 )
 
 func main() {
@@ -36,7 +34,7 @@ func main() {
 
 	// Connect to imap server
 	log.Ctx(ctx).Debug().Msgf("Connecting to IMAP server %s", imapAddress)
-	imapClient, err := client.DialTLS(imapAddress, &tls.Config{InsecureSkipVerify: true}) //nolint:gosec // We support self signed imap server
+	imapClient, err := client.DialTLS(imapAddress, &tls.Config{InsecureSkipVerify: true}) //nolint:gosec // We support self-signed imap server
 	if err != nil {
 		panic(err)
 	}
@@ -171,7 +169,7 @@ func main() {
 }
 
 func listFolder(ctx context.Context, client *client.Client) []imap.MailboxInfo {
-	mailboxes := make(chan *imap.MailboxInfo, 10)
+	mailboxes := make(chan *imap.MailboxInfo, 100)
 	done := make(chan error, 1)
 	go func() {
 		done <- client.List("", "*", mailboxes)
@@ -181,7 +179,7 @@ func listFolder(ctx context.Context, client *client.Client) []imap.MailboxInfo {
 		log.Ctx(ctx).Err(err).Msg("Error for listing folders")
 	}
 
-	result := []imap.MailboxInfo{}
+	var result []imap.MailboxInfo
 	for m := range mailboxes {
 		result = append(result, *m)
 	}
