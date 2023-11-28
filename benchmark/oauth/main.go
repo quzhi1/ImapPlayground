@@ -17,7 +17,7 @@ import (
 const (
 	imapAddress = "imap.mail.yahoo.com:993"
 	folderName  = "Inbox"
-	username    = "ps_21_69@yahoo.com"
+	username    = "nylasinc@yahoo.com"
 	// Fill it with your own access token
 	accessToken = ""
 )

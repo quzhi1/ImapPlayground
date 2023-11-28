@@ -7,12 +7,15 @@ import (
 	"github.com/emersion/go-imap/client"
 )
 
-var imapAddress = "imap.mail.yahoo.com:993"
+// var imapAddress = "imap.mail.yahoo.com:993"
+var imapAddress = "imap.mail.me.com:993"
 
 func main() {
 	// Read auth
-	username := os.Getenv("YAHOO_EMAIL_ADDRESS")
-	password := os.Getenv("YAHOO_APP_PASSWORD")
+	//username := os.Getenv("YAHOO_EMAIL_ADDRESS")
+	//password := os.Getenv("YAHOO_APP_PASSWORD")
+	username := os.Getenv("ICLOUD_EMAIL_ADDRESS")
+	password := os.Getenv("ICLOUD_APP_PASSWORD")
 
 	idle(username, password)
 	log.Println("Done!")
@@ -32,11 +35,16 @@ func idle(username, password string) {
 	}
 	log.Println("Logged in")
 
-	// Don't forget to logout
-	defer c.Logout()
+	// Don't forget to log out
+	defer func(c *client.Client) {
+		err = c.Logout()
+		if err != nil {
+			log.Println(err)
+		}
+	}(c)
 
 	// Select folder
-	_, err = c.Select("Inbox", true)
+	_, err = c.Select("Sent Messages", true)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,7 +54,6 @@ func idle(username, password string) {
 	c.Updates = updates
 
 	// Start idling
-	// stopped := false
 	stop := make(chan struct{})
 	done := make(chan error, 1)
 	go func() {
@@ -75,10 +82,6 @@ func idle(username, password string) {
 			default:
 				log.Printf("Unknown update: %v\n", typedUpdate)
 			}
-			// if !stopped {
-			// 	close(stop)
-			// 	stopped = true
-			// }
 		case err := <-done:
 			if err != nil {
 				log.Printf("Got error: %v\n", err)
