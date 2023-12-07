@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"github.com/google/uuid"
 	"io"
 	"os"
 	"regexp"
@@ -23,10 +24,8 @@ var (
 	encodingError    = "encoding error"
 	// username = os.Getenv("YAHOO_EMAIL_ADDRESS")
 	// password = os.Getenv("YAHOO_APP_PASSWORD")
-	//username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
-	//password = os.Getenv("ICLOUD_APP_PASSWORD")
-	username = "nylas.sdet@icloud.com"
-	password = "assu-ndrx-lpzq-xjjg"
+	username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
+	password = os.Getenv("ICLOUD_APP_PASSWORD")
 )
 
 const (
@@ -35,7 +34,7 @@ const (
 	folderName           = "Drafts"
 	HTMLContentType      = "text/html"
 	PlainTextContentType = "text/plain"
-	uid                  = 50
+	uid                  = 10
 )
 
 func main() {
@@ -213,7 +212,7 @@ func printAttachment(ctx context.Context, header message.Header, part *mail.Part
 	if header.Header.Has("X-Attachment-Id") {
 		fileID = header.Header.Get("X-Attachment-Id")
 	} else {
-		panic("Attachment has no X-Attachment-Id header")
+		fileID = uuid.New().String()
 	}
 
 	// Read file name
