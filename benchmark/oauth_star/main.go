@@ -1,67 +1,111 @@
 package main
 
 import (
+	"context"
+	"crypto/tls"
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
-	"log"
+	"github.com/emersion/go-sasl"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"os"
 )
 
 const (
-	server      = "imap.mail.yahoo.com:993"
-	email       = "your_email@yahoo.com"
-	accessToken = "bOHK0bufuFvfNlNG1ZvhWUCs_8Fs8xM.d2OuiPSni6YrA8_0xllRp9_xeA8P1MVF.hEOAJGML3Iuv6vy5kEq.bk_lpeIUCUvg2mIzUj2ejyjrmHFHRqWYBkHcWemcbojZCZ2uxyTYEp70NaYEjmaTrhlgIhY8J3Y5kEP_k_sE7xS79wHGr46NgfGGu.wqsccLdQgcxk5zvC__9n0iT3ZAi92.3XYL6rtzR9o21u9eF0dmsY.ONkzKAQvH2eik92MLYA.KAUfhlTUWYY5TlZa97pnE82eCX4Qv7FX1lPQN95s.Loqb0T7xm1hKQIJ35ws_9xBvInpG6AzN2kSe0.7jerEboz35bGPXX8cz5h5HnDKpTNY2nyuLQd7aYTZw9Za4NAtgSuIKS4JFnzueGMGYomDccHpeS36IYp_3Bgv2rZukhHv1K0c9_49YIPD6vw.UgY974uS0.WxEKng9sqhgZ761N7_coDiFIWd7o3ypkTJ3M6u5yWZXsggkIhq.WEYlEH8v437z.S.V1iPEy5_YX.zUT.8mvzeD__bwiDSYUMxb.XykHBmngc3CmE1uRb6WtiUorsA83CSn4JonQ0aKzQ.WWbM3moPysRcpKDZXpZHcR23hNyHqUPQDQdhhgT7eNmX7oVlJAOBV0JzmEqX.zLv45YTn0QjEtjU7xLR2bzuKJQ2CIO5yMNlHnla1Tcu9ScJ9PUJFtt8VKRNvAJjbq1x15Ol42eiIoOOuUChMBCGmUL79WfF0SLhuXB12NZE7eUwy_DGQvCCc9W8.KMpfbhZ7ai9Yx_Hw5lTL57yfKFBt2ut9xZzr2zzddhwNyNt_FpHNVOL6sJQyTOlW6xUZB0H04ImNWLA42HwQdFczIPonhRFT9ASjF_WYXMNbbCnwwRUTfs_7iepe996amlf73NJ5kOQCVWoZZKCSKjKOuK0QptR6Cdrb0ZFST0V6LTfdoEWSrBcNj3OSlJo2nQezxW2Pci_RAMPqoXF2TUP1AliwP4pwPMgP_Pnljg-"
+	imapAddress = "imap.mail.yahoo.com:993"
+	username    = "nylasinc@yahoo.com"
+	accessToken = ""
 )
 
+var password = os.Getenv("NYLAS_INC_YAHOO_APP_PASSWORD")
+
 func main() {
+	// Init logger
+	logger := zerolog.
+		New(os.Stdout).
+		With().
+		Timestamp().
+		Logger().
+		Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	ctx := logger.WithContext(context.Background())
 
-	// Connect to the server
-	c, err := client.DialTLS(server, nil)
+	// Connect to imap server
+	log.Ctx(ctx).Debug().Msgf("Connecting to IMAP server %s", imapAddress)
+	imapClient, err := client.DialTLS(imapAddress, &tls.Config{InsecureSkipVerify: true}) //nolint:gosec // We support self-signed imap server
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-	log.Println("Connected")
 
-	// Authenticate
-	auth := oauth2.NewXOAuth2(email, accessToken)
-	if err := c.Authenticate(auth); err != nil {
-		log.Fatal(err)
+	// Create SASL client
+	saslClient := sasl.NewOAuthBearerClient(&sasl.OAuthBearerOptions{
+		Username: username,
+		Token:    accessToken,
+	})
+
+	// Login
+	err = imapClient.Authenticate(saslClient)
+	//err = imapClient.Login(username, password)
+	if err != nil {
+		panic(err)
 	}
-	log.Println("Authenticated")
+
+	log.Ctx(ctx).Debug().Str("username", username).Msg("Logged in to IMAP server")
+
+	// Defer logout
+	defer func() {
+		if err = imapClient.Logout(); err != nil {
+			log.Ctx(ctx).Fatal().Err(err)
+		}
+	}()
 
 	// Select INBOX
-	_, err = c.Select("INBOX", false)
+	_, err = imapClient.Select("INBOX", false)
 	if err != nil {
-		log.Fatal(err)
+		log.Ctx(ctx).Fatal().Err(err)
 	}
 
-	// Search for a specific message
-	// Here you need to define how you want to search for your message. This is just an example.
+	// List some uids
 	criteria := imap.NewSearchCriteria()
-	criteria.Header.Add("Subject", "Subject of the email to star")
-	uids, err := c.Search(criteria)
+	criteria.Header.Add("Subject", "Zhi Test")
+	uids, err := imapClient.UidSearch(criteria)
 	if err != nil {
-		log.Fatal(err)
+		log.Ctx(ctx).Fatal().Err(err)
 	}
 
-	// Assuming the message exists and its UID is known
-	if len(uids) > 0 {
-		seqSet := new(imap.SeqSet)
-		seqSet.AddNum(uids...)
-
-		// Set the flag
-		item := imap.FormatFlagsOp(imap.AddFlags, true)
-		flags := []interface{}{imap.Flagged}
-		err = c.Store(seqSet, item, flags, nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Println("Message starred")
-	} else {
-		log.Println("No messages found")
+	if len(uids) == 0 {
+		log.Ctx(ctx).Fatal().Msg("No message in inbox")
 	}
 
-	// Logout
-	if err := c.Logout(); err != nil {
-		log.Fatal(err)
+	uid := uids[0]
+	log.Ctx(ctx).Info().Uint32("uid", uid).Msg("Select the first uid")
+	seqSet := new(imap.SeqSet)
+	seqSet.AddNum(uid)
+
+	// Set the flag
+	item := imap.FormatFlagsOp(imap.AddFlags, true)
+	flags := []interface{}{imap.FlaggedFlag}
+	err = imapClient.UidStore(seqSet, item, flags, nil)
+	if err != nil {
+		log.Ctx(ctx).Fatal().Err(err)
+	}
+	log.Ctx(ctx).Info().Msg("Message changed")
+
+	// Verify
+	done := make(chan error, 1)
+	messageChans := make(chan *imap.Message, 10)
+	items := []imap.FetchItem{
+		imap.FetchEnvelope,
+		imap.FetchFlags,
+	}
+	go func() {
+		done <- imapClient.UidFetch(seqSet, items, messageChans)
+	}()
+	if err := <-done; err != nil {
+		panic(err)
+	}
+
+	// Print the messages
+	for msg := range messageChans {
+		log.Ctx(ctx).Info().Strs("flags", msg.Flags).Str("subject", msg.Envelope.Subject).Msg("Reading message")
 	}
 }
