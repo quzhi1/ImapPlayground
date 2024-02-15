@@ -53,17 +53,20 @@ func main() {
 	}
 	log.Printf("INBOX contains %v messages", selectedMbox.NumMessages)
 
-	// Start idling
-	idleCmd, err := c.Idle()
-	if err != nil {
-		log.Fatalf("IDLE command failed: %v", err)
-	}
+	for {
+		// Start idling every 30 seconds
+		idleCmd, err := c.Idle()
+		if err != nil {
+			log.Printf("IDLE command failed: %v, retrying\n", err)
+			continue
+		}
 
-	// Wait for 30 minutes
-	time.Sleep(30 * time.Minute)
+		// Wait for 30s
+		time.Sleep(30 * time.Second)
 
-	// Stop idling
-	if err := idleCmd.Close(); err != nil {
-		log.Fatalf("failed to stop idling: %v", err)
+		// Stop idling
+		if err := idleCmd.Close(); err != nil {
+			log.Fatalf("failed to stop idling: %v", err)
+		}
 	}
 }
