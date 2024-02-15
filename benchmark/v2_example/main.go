@@ -42,7 +42,7 @@ func main() {
 		log.Printf(" - %v", mbox.Mailbox)
 	}
 
-	// Select INBOX
+	// Select Archive
 	selectedMbox, err := c.Select("Archive", &imap.SelectOptions{ReadOnly: true}).Wait()
 	if err != nil {
 		log.Fatalf("failed to select Archive: %v", err)
@@ -52,8 +52,9 @@ func main() {
 	// Fetch first message in Archive
 	if selectedMbox.NumMessages > 0 {
 		seqSet := imap.SeqSetNum(1)
-		fetchItems := []imap.FetchItem{imap.FetchItemEnvelope}
-		messages, err := c.Fetch(seqSet, fetchItems, &imap.FetchOptions{}).Collect()
+		messages, err := c.Fetch(seqSet, &imap.FetchOptions{
+			Envelope: true,
+		}).Collect()
 		if err != nil {
 			log.Fatalf("failed to fetch first message in Archive: %v", err)
 		}
