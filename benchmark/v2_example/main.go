@@ -65,4 +65,7 @@ func main() {
 	if err := c.Logout().Wait(); err != nil {
 		log.Fatalf("failed to logout: %v", err)
 	}
+
+	// Check imap client state
+	log.Println("IMAP client state:", c.State())
 }
