@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
-	"github.com/google/uuid"
 	"io"
 	"os"
 	"regexp"
@@ -14,6 +13,7 @@ import (
 	"github.com/emersion/go-imap/client"
 	"github.com/emersion/go-message"
 	"github.com/emersion/go-message/mail"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -31,10 +31,10 @@ var (
 const (
 	// imapAddress = "imap.mail.yahoo.com:993"
 	imapAddress          = "imap.mail.me.com:993"
-	folderName           = "Drafts"
+	folderName           = "INBOX"
 	HTMLContentType      = "text/html"
 	PlainTextContentType = "text/plain"
-	uid                  = 10
+	uid                  = 176
 )
 
 func main() {
@@ -98,6 +98,10 @@ func main() {
 	for msg := range messageChans {
 		if msg == nil {
 			log.Ctx(ctx).Fatal().Msg("Server didn't returned message")
+		} else if msg.Envelope != nil {
+			log.Ctx(ctx).Info().Time("date", msg.Envelope.Date).Str("message_id", msg.Envelope.MessageId).Msg("Got message")
+		} else {
+			log.Ctx(ctx).Warn().Msg("Envelope is nil")
 		}
 
 		r := msg.GetBody(&section)
