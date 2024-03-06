@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/emersion/go-imap/v2"
@@ -24,7 +25,9 @@ var (
 
 const (
 	// imapAddress = "west.EXCH092.serverdata.net:993"
-	imapAddress = "imap.mail.me.com:993"
+	imapAddress          = "imap.mail.me.com:993"
+	HTMLContentType      = "text/html"
+	PlainTextContentType = "text/plain"
 )
 
 func main() {
@@ -133,13 +136,13 @@ func loadMsgs(ctx context.Context, imapClient *imapclient.Client, uids []imap.UI
 
 			switch item := item.(type) {
 			case imapclient.FetchItemDataEnvelope:
-				log.Ctx(ctx).Debug().Any("from", item.Envelope.From).Msg("Reading envelope")
+				// log.Ctx(ctx).Debug().Any("from", item.Envelope.From).Msg("Reading envelope")
 			case imapclient.FetchItemDataBodySection:
-				readBodySection(ctx, item)
+				readBodySection(ctx, item.Literal)
 			case imapclient.FetchItemDataFlags:
-				log.Ctx(ctx).Debug().Any("flags", item.Flags).Msg("Reading flags")
+				// log.Ctx(ctx).Debug().Any("flags", item.Flags).Msg("Reading flags")
 			case imapclient.FetchItemDataUID:
-				log.Ctx(ctx).Debug().Uint32("uid", uint32(item.UID)).Msg("Reading UID")
+				// log.Ctx(ctx).Debug().Uint32("uid", uint32(item.UID)).Msg("Reading UID")
 			default:
 				log.Ctx(ctx).Warn().Str("fetch_item_type", reflect.TypeOf(item).String()).Msg("Unknown fetch item type")
 			}
@@ -147,9 +150,9 @@ func loadMsgs(ctx context.Context, imapClient *imapclient.Client, uids []imap.UI
 	}
 }
 
-func readBodySection(ctx context.Context, bodySection imapclient.FetchItemDataBodySection) {
+func readBodySection(ctx context.Context, bodyLiteral imap.LiteralReader) {
 	// Read the message via the go-message library
-	mr, err := mail.CreateReader(bodySection.Literal)
+	mr, err := mail.CreateReader(bodyLiteral)
 	if err != nil {
 		panic(err)
 	}
@@ -171,11 +174,20 @@ func readBodySection(ctx context.Context, bodySection imapclient.FetchItemDataBo
 			panic(err)
 		}
 
-		switch p.Header.(type) {
+		switch partHeader := p.Header.(type) {
 		case *mail.InlineHeader:
 			// This is the message's text (can be plain-text or HTML)
-			// b, _ := io.ReadAll(p.Body)
-			// log.Ctx(ctx).Info().Str("text", string(b)).Msg("body")
+			contentType := partHeader.Header.Header.Get("Content-Type")
+			switch {
+			case strings.Contains(contentType, PlainTextContentType):
+				b, _ := io.ReadAll(p.Body)
+				log.Ctx(ctx).Info().Str("text", string(b)).Msg("txt body")
+			case strings.Contains(contentType, HTMLContentType):
+				b, _ := io.ReadAll(p.Body)
+				log.Ctx(ctx).Info().Str("html", string(b)).Msg("html body")
+			default:
+				log.Ctx(ctx).Warn().Str("content_type", contentType).Msg("Inline attachment")
+			}
 		}
 	}
 }
