@@ -24,8 +24,6 @@ var (
 const (
 	imapAddress = "west.EXCH092.serverdata.net:993"
 	// imapAddress          = "imap.mail.me.com:993"
-	HTMLContentType      = "text/html"
-	PlainTextContentType = "text/plain"
 )
 
 func main() {
@@ -72,7 +70,7 @@ func main() {
 		log.Ctx(ctx).Info().Str("folderName", folder.Mailbox).Any("uids", uids).Msg("Found messages")
 
 		// Load message
-		loadMsg(ctx, imapClient, uids)
+		loadMsgs(ctx, imapClient, uids)
 	}
 
 	// Logout
@@ -103,7 +101,7 @@ func searchOneFolder(_ context.Context, imapClient *imapclient.Client, folderNam
 	return searchResponses.AllUIDs()
 }
 
-func loadMsg(ctx context.Context, imapClient *imapclient.Client, uids []imap.UID) {
+func loadMsgs(ctx context.Context, imapClient *imapclient.Client, uids []imap.UID) {
 	if len(uids) == 0 {
 		return
 	}

@@ -85,7 +85,7 @@ func main() {
 		imap.FetchInternalDate,
 		section.FetchItem(),
 	}
-	messageChans := make(chan *imap.Message, 10)
+	messageChans := make(chan *imap.Message, 10000)
 	done := make(chan error, 1)
 	go func() {
 		done <- imapClient.UidFetch(seqset, items, messageChans)
