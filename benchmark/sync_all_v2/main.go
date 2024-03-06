@@ -138,10 +138,6 @@ func loadMsgs(ctx context.Context, imapClient *imapclient.Client, uids []imap.UI
 			}
 		}
 	}
-
-	if err := fetchCmd.Close(); err != nil {
-		panic(err)
-	}
 }
 
 func readBodySection(ctx context.Context, bodySection imapclient.FetchItemDataBodySection) {
