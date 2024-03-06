@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"io"
 	"os"
+	"reflect"
 	"time"
 
 	"github.com/emersion/go-imap/v2"
@@ -15,15 +16,15 @@ import (
 )
 
 var (
-	username = os.Getenv("INTERMEDIA_EMAIL_ADDRESS")
-	password = os.Getenv("INTERMEDIA_PASSWORD")
-	// username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
-	// password = os.Getenv("ICLOUD_APP_PASSWORD")
+	// username = os.Getenv("INTERMEDIA_EMAIL_ADDRESS")
+	// password = os.Getenv("INTERMEDIA_PASSWORD")
+	username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
+	password = os.Getenv("ICLOUD_APP_PASSWORD")
 )
 
 const (
-	imapAddress = "west.EXCH092.serverdata.net:993"
-	// imapAddress          = "imap.mail.me.com:993"
+	// imapAddress = "west.EXCH092.serverdata.net:993"
+	imapAddress = "imap.mail.me.com:993"
 )
 
 func main() {
@@ -109,10 +110,10 @@ func loadMsgs(ctx context.Context, imapClient *imapclient.Client, uids []imap.UI
 	// Send a FETCH command to fetch the message body
 	seqSet := imap.UIDSetNum(uids...)
 	fetchOptions := &imap.FetchOptions{
-		Envelope:     true,
-		Flags:        true,
-		InternalDate: true,
-		BodySection:  []*imap.FetchItemBodySection{{}},
+		Envelope:    true,
+		Flags:       true,
+		UID:         true,
+		BodySection: []*imap.FetchItemBodySection{{Peek: true}},
 	}
 	fetchCmd := imapClient.Fetch(seqSet, fetchOptions)
 	defer fetchCmd.Close()
@@ -135,6 +136,12 @@ func loadMsgs(ctx context.Context, imapClient *imapclient.Client, uids []imap.UI
 				log.Ctx(ctx).Debug().Any("from", item.Envelope.From).Msg("Reading envelope")
 			case imapclient.FetchItemDataBodySection:
 				readBodySection(ctx, item)
+			case imapclient.FetchItemDataFlags:
+				log.Ctx(ctx).Debug().Any("flags", item.Flags).Msg("Reading flags")
+			case imapclient.FetchItemDataUID:
+				log.Ctx(ctx).Debug().Uint32("uid", uint32(item.UID)).Msg("Reading UID")
+			default:
+				log.Ctx(ctx).Warn().Str("fetch_item_type", reflect.TypeOf(item).String()).Msg("Unknown fetch item type")
 			}
 		}
 	}
