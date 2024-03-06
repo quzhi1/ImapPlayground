@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"io"
@@ -114,38 +115,23 @@ func loadMsgs(ctx context.Context, imapClient *imapclient.Client, uids []imap.UI
 		InternalDate: true,
 		BodySection:  []*imap.FetchItemBodySection{{}},
 	}
-	fetchCmd := imapClient.Fetch(seqSet, fetchOptions)
-	defer fetchCmd.Close()
-
-	// Find the body section in the response
-	var bodySection imapclient.FetchItemDataBodySection
-	var ok bool
-	for {
-		msg := fetchCmd.Next()
-		if msg == nil {
-			break
-		}
-		for {
-			item := msg.Next()
-			if item == nil {
-				break
-			}
-			bodySection, ok = item.(imapclient.FetchItemDataBodySection)
-			if ok {
-				readBodySection(ctx, bodySection)
-			}
-
-		}
+	msgs, err := imapClient.Fetch(seqSet, fetchOptions).Collect()
+	if err != nil {
+		panic(err)
 	}
 
-	if err := fetchCmd.Close(); err != nil {
-		panic(err)
+	// Find the body section in the response
+	for _, msg := range msgs {
+		for _, bodyBytes := range msg.BodySection {
+			readBodySection(ctx, bodyBytes)
+		}
+
 	}
 }
 
-func readBodySection(ctx context.Context, bodySection imapclient.FetchItemDataBodySection) {
+func readBodySection(ctx context.Context, bodyBytes []byte) {
 	// Read the message via the go-message library
-	mr, err := mail.CreateReader(bodySection.Literal)
+	mr, err := mail.CreateReader(bytes.NewBuffer(bodyBytes))
 	if err != nil {
 		panic(err)
 	}
