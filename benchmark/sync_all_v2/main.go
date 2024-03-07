@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"io"
 	"os"
 	"reflect"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
+	"github.com/emersion/go-message"
 	"github.com/emersion/go-message/mail"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -28,6 +30,8 @@ const (
 	imapAddress          = "imap.mail.me.com:993"
 	HTMLContentType      = "text/html"
 	PlainTextContentType = "text/plain"
+	multipartError       = "multipart:"
+	encodingError        = "encoding error"
 )
 
 func main() {
@@ -122,6 +126,8 @@ func loadMsgs(ctx context.Context, imapClient *imapclient.Client, uids []imap.UI
 	defer fetchCmd.Close()
 
 	// Find the body section in the response
+	var mr *mail.Reader
+	var err error
 	for {
 		msg := fetchCmd.Next()
 		if msg == nil {
@@ -138,7 +144,11 @@ func loadMsgs(ctx context.Context, imapClient *imapclient.Client, uids []imap.UI
 			case imapclient.FetchItemDataEnvelope:
 				// log.Ctx(ctx).Debug().Any("from", item.Envelope.From).Msg("Reading envelope")
 			case imapclient.FetchItemDataBodySection:
-				readBodySection(ctx, item.Literal)
+				// Read the message via the go-message library
+				mr, err = mail.CreateReader(item.Literal)
+				if err != nil {
+					panic(err)
+				}
 			case imapclient.FetchItemDataFlags:
 				// log.Ctx(ctx).Debug().Any("flags", item.Flags).Msg("Reading flags")
 			case imapclient.FetchItemDataUID:
@@ -148,36 +158,46 @@ func loadMsgs(ctx context.Context, imapClient *imapclient.Client, uids []imap.UI
 			}
 		}
 	}
+	parseBody(ctx, mr)
 }
 
-func readBodySection(ctx context.Context, bodyLiteral imap.LiteralReader) {
-	// Read the message via the go-message library
-	mr, err := mail.CreateReader(bodyLiteral)
-	if err != nil {
-		panic(err)
-	}
-
-	// Print a few header fields
-	h := mr.Header
-	if subject, err := h.Text("Subject"); err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("failed to parse Subject header field")
-	} else {
-		log.Ctx(ctx).Info().Str("subject", subject).Msg("Loading message")
-	}
-
-	// Process the message's parts
+func parseBody(ctx context.Context, mr *mail.Reader) {
 	for {
 		p, err := mr.NextPart()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		} else if err != nil {
-			panic(err)
+			shouldBreak := false
+			switch {
+			case message.IsUnknownCharset(err):
+				log.Ctx(ctx).Warn().Err(err).Msg("Ignore unknown charset")
+			case strings.Contains(err.Error(), "malformed MIME header line"):
+				log.Ctx(ctx).Warn().Err(err).Msg("Ignore malformed MIME header line")
+			case strings.Contains(err.Error(), multipartError):
+				log.Ctx(ctx).Warn().Err(err).Msg("Ignore multipart error")
+				shouldBreak = true
+			case strings.Contains(err.Error(), encodingError):
+				log.Ctx(ctx).Warn().Err(err).Msg("Ignore encoding error")
+				shouldBreak = true
+			default:
+				log.Ctx(ctx).Error().Err(err).Msg("Error reading message part")
+				panic(err)
+			}
+
+			if shouldBreak {
+				break
+			}
+		}
+
+		if p == nil {
+			continue
 		}
 
 		switch partHeader := p.Header.(type) {
 		case *mail.InlineHeader:
 			// This is the message's text (can be plain-text or HTML)
 			contentType := partHeader.Header.Header.Get("Content-Type")
+			log.Ctx(ctx).Debug().Str("content_type", contentType).Msg("found content-type")
 			switch {
 			case strings.Contains(contentType, PlainTextContentType):
 				b, _ := io.ReadAll(p.Body)
