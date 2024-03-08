@@ -3,17 +3,12 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"errors"
-	"io"
 	"os"
 	"reflect"
-	"strings"
 	"time"
 
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
-	"github.com/emersion/go-message"
-	"github.com/emersion/go-message/mail"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -89,18 +84,12 @@ func main() {
 	}
 }
 
-func searchOneFolder(_ context.Context, imapClient *imapclient.Client, folderName string) []imap.UID {
-	// Select folder
-	_, err := imapClient.Select(folderName, &imap.SelectOptions{ReadOnly: true}).Wait()
-	if err != nil {
-		panic(err)
-	}
-	// log.Ctx(ctx).Debug().Str("folderName", folderName).Msg("Searching folder")
-
+func searchOneFolder(ctx context.Context, imapClient *imapclient.Client, folderName string) []imap.UID {
 	// Search for messages in the last 90 days
 	criteria := imap.SearchCriteria{
 		SentSince: time.Now().AddDate(0, 0, -90),
 	}
+	log.Ctx(ctx).Debug().Str("folderName", folderName).Msg("Searching folder")
 	searchResponses, err := imapClient.UIDSearch(&criteria, nil).Wait()
 	if err != nil {
 		panic(err)
@@ -126,8 +115,6 @@ func loadMsgs(ctx context.Context, imapClient *imapclient.Client, uids []imap.UI
 	defer fetchCmd.Close()
 
 	// Find the body section in the response
-	var mr *mail.Reader
-	var err error
 	for {
 		msg := fetchCmd.Next()
 		if msg == nil {
@@ -143,70 +130,19 @@ func loadMsgs(ctx context.Context, imapClient *imapclient.Client, uids []imap.UI
 			switch item := item.(type) {
 			case imapclient.FetchItemDataEnvelope:
 				// log.Ctx(ctx).Debug().Any("from", item.Envelope.From).Msg("Reading envelope")
+				log.Ctx(ctx).Debug().Str("message_id", item.Envelope.MessageID).Msg("Reading message ID")
 			case imapclient.FetchItemDataBodySection:
-				// Read the message via the go-message library
-				mr, err = mail.CreateReader(item.Literal)
-				if err != nil {
-					panic(err)
-				}
+				// b, err := io.ReadAll(item.Literal)
+				// if err != nil {
+				// 	panic(err)
+				// }
+				// fmt.Println(string(b))
 			case imapclient.FetchItemDataFlags:
 				// log.Ctx(ctx).Debug().Any("flags", item.Flags).Msg("Reading flags")
 			case imapclient.FetchItemDataUID:
 				// log.Ctx(ctx).Debug().Uint32("uid", uint32(item.UID)).Msg("Reading UID")
 			default:
 				log.Ctx(ctx).Warn().Str("fetch_item_type", reflect.TypeOf(item).String()).Msg("Unknown fetch item type")
-			}
-		}
-	}
-	parseBody(ctx, mr)
-}
-
-func parseBody(ctx context.Context, mr *mail.Reader) {
-	for {
-		p, err := mr.NextPart()
-		if errors.Is(err, io.EOF) {
-			break
-		} else if err != nil {
-			shouldBreak := false
-			switch {
-			case message.IsUnknownCharset(err):
-				log.Ctx(ctx).Warn().Err(err).Msg("Ignore unknown charset")
-			case strings.Contains(err.Error(), "malformed MIME header line"):
-				log.Ctx(ctx).Warn().Err(err).Msg("Ignore malformed MIME header line")
-			case strings.Contains(err.Error(), multipartError):
-				log.Ctx(ctx).Warn().Err(err).Msg("Ignore multipart error")
-				shouldBreak = true
-			case strings.Contains(err.Error(), encodingError):
-				log.Ctx(ctx).Warn().Err(err).Msg("Ignore encoding error")
-				shouldBreak = true
-			default:
-				log.Ctx(ctx).Error().Err(err).Msg("Error reading message part")
-				panic(err)
-			}
-
-			if shouldBreak {
-				break
-			}
-		}
-
-		if p == nil {
-			continue
-		}
-
-		switch partHeader := p.Header.(type) {
-		case *mail.InlineHeader:
-			// This is the message's text (can be plain-text or HTML)
-			contentType := partHeader.Header.Header.Get("Content-Type")
-			log.Ctx(ctx).Debug().Str("content_type", contentType).Msg("found content-type")
-			switch {
-			case strings.Contains(contentType, PlainTextContentType):
-				b, _ := io.ReadAll(p.Body)
-				log.Ctx(ctx).Info().Str("text", string(b)).Msg("txt body")
-			case strings.Contains(contentType, HTMLContentType):
-				b, _ := io.ReadAll(p.Body)
-				log.Ctx(ctx).Info().Str("html", string(b)).Msg("html body")
-			default:
-				log.Ctx(ctx).Warn().Str("content_type", contentType).Msg("Inline attachment")
 			}
 		}
 	}

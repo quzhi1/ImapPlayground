@@ -51,6 +51,7 @@ tag STATUS INBOX (MESSAGES)
 tag STATUS Archive (MESSAGES)
 # List all UIDs
 tag uid search all
+tag uid search SINCE 01-March-2024
 # Change flags
 tag STORE 1 +FLAGS (\abc)
 # Check last 10 messages
