@@ -52,6 +52,7 @@ tag STATUS Archive (MESSAGES)
 # List all UIDs
 tag uid search all
 tag uid search SENTSINCE 01-March-2024
+tag uid search NOT TEXT Zhi
 # Change flags
 tag STORE 1 +FLAGS (\abc)
 # Check last 10 messages
