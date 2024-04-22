@@ -15,8 +15,10 @@ func main() {
 	// password := os.Getenv("YAHOO_APP_PASSWORD")
 	// username := os.Getenv("ICLOUD_EMAIL_ADDRESS")
 	// password := os.Getenv("ICLOUD_APP_PASSWORD")
-	username := os.Getenv("INTERMEDIA_EMAIL_ADDRESS")
-	password := os.Getenv("INTERMEDIA_PASSWORD")
+	// username := os.Getenv("INTERMEDIA_EMAIL_ADDRESS")
+	// password := os.Getenv("INTERMEDIA_PASSWORD")
+	username := os.Getenv("DYNADOT_EMAIL_ADDRESS")
+	password := os.Getenv("DYNADOT_PASSWORD")
 
 	// Connect
 	option := &imapclient.Options{
@@ -38,7 +40,8 @@ func main() {
 	// c, err := imapclient.DialTLS("imap.mail.yahoo.com:993", option)
 	// c, err := imapclient.DialTLS("imap.mail.yahoo.com:993", nil)
 	// c, err := imapclient.DialTLS("imap.mail.me.com:993", option)
-	c, err := imapclient.DialTLS("west.EXCH092.serverdata.net:993", option)
+	// c, err := imapclient.DialTLS("west.EXCH092.serverdata.net:993", option)
+	c, err := imapclient.DialTLS("webhost.dynadot.com:993", option)
 	if err != nil {
 		log.Fatalf("failed to dial IMAP server: %v", err)
 	}
