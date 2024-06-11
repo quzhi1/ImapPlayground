@@ -21,11 +21,11 @@ func main() {
 	}
 
 	// ID
-	idData, err := c.Id(&imap.IdData{
+	idData, err := c.ID(&imap.IDData{
 		Name:      "go-imap",
 		Version:   "1.0",
-		Os:        "Linux",
-		OsVersion: "7.9.4",
+		OS:        "Linux",
+		OSVersion: "7.9.4",
 		Vendor:    "Yahoo",
 	}).Wait()
 	if err != nil {
@@ -35,6 +35,6 @@ func main() {
 		"Name:", idData.Name,
 		"Version:", idData.Version,
 		"Vendor:", idData.Vendor,
-		"SupportUrl:", idData.SupportUrl,
+		"SupportUrl:", idData.SupportURL,
 	)
 }
