@@ -15,6 +15,7 @@
 # vendor/
 
 tmp*.txt
+tmp*.json
 *.csv
 .DS_Store
 .idea
