@@ -21,9 +21,9 @@ var (
 const (
 	// imapAddress = "west.EXCH092.serverdata.net:993"
 	imapAddress = "imap.mail.me.com:993"
-	// imapAddress = "mail.tolkeyenpatagonia.com:993"
-	folderName = "INBOX"
-	message_id = "<0c9701dabc0d$7aea8ec0$70bfac40$@inspiratravel.com>"
+	// imapAddress = "imap.1und1.de:993"
+	folderName = "Papierkorb"
+	message_id = "<CADPS7cRy8LrKiX2Zrf14x_rzo8VsCOGdM040ni_JphakRQHD6g@mail.gmail.com>"
 )
 
 func main() {
@@ -85,4 +85,28 @@ func main() {
 	}
 
 	log.Ctx(ctx).Info().Any("uids", searchResponses.AllUIDs()).Msg("Found messages")
+	if len(searchResponses.AllUIDs()) == 0 {
+		log.Ctx(ctx).Warn().Msg("No messages found")
+		return
+	}
+
+	// Fetch messages and print raw MIME into tmp.eml
+	uid := searchResponses.AllUIDs()[0]
+	log.Ctx(ctx).Info().Uint32("uid", uint32(uid)).Msg("Fetching message")
+	seqSet := imap.UIDSetNum(uid)
+	fetchOptions := &imap.FetchOptions{
+		Envelope:    true,
+		Flags:       true,
+		UID:         true,
+		BodySection: []*imap.FetchItemBodySection{{Peek: true}},
+	}
+	fetchCmd := imapClient.Fetch(seqSet, fetchOptions)
+	fetchedMsgs, err := fetchCmd.Collect()
+	if err != nil {
+		panic(err)
+	}
+	if len(fetchedMsgs) == 0 {
+		log.Ctx(ctx).Warn().Msg("No messages fetched")
+		return
+	}
 }
