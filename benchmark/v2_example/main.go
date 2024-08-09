@@ -12,16 +12,19 @@ func main() {
 	// Read auth
 	// username := os.Getenv("YAHOO_EMAIL_ADDRESS")
 	// password := os.Getenv("YAHOO_APP_PASSWORD")
-	username := os.Getenv("ICLOUD_EMAIL_ADDRESS")
-	password := os.Getenv("ICLOUD_APP_PASSWORD")
+	// username := os.Getenv("ICLOUD_EMAIL_ADDRESS")
+	// password := os.Getenv("ICLOUD_APP_PASSWORD")
+	username := os.Getenv("MCSPOWERMAIL_EMAIL_ADDRESS")
+	password := os.Getenv("MCSPOWERMAIL_PASSWORD")
+
+	// url := "imap.mail.me.com:993"
+	url := "mail.mcspowermail.com:993"
 
 	// Connect
 	option := &imapclient.Options{
 		DebugWriter: os.Stdout,
 	}
-	// c, err := imapclient.DialTLS("imap.mail.yahoo.com:993", option)
-	// c, err := imapclient.DialTLS("imap.mail.yahoo.com:993", nil)
-	c, err := imapclient.DialTLS("imap.mail.me.com:993", option)
+	c, err := imapclient.DialTLS(url, option)
 	if err != nil {
 		log.Fatalf("failed to dial IMAP server: %v", err)
 	}
@@ -32,8 +35,15 @@ func main() {
 		log.Fatalf("failed to login: %v", err)
 	}
 
+	// Defer logout
+	defer func() {
+		if err := c.Logout().Wait(); err != nil {
+			log.Fatalf("failed to logout: %v", err)
+		}
+	}()
+
 	// List mailboxes
-	mailboxes, err := c.List("", "%", nil).Collect()
+	mailboxes, err := c.List("", "*", nil).Collect()
 	if err != nil {
 		log.Fatalf("failed to list mailboxes: %v", err)
 	}
@@ -42,14 +52,15 @@ func main() {
 		log.Printf(" - %v", mbox.Mailbox)
 	}
 
-	// Select Archive
-	selectedMbox, err := c.Select("Archive", &imap.SelectOptions{ReadOnly: true}).Wait()
+	// Select INBOX
+	selectedMbox, err := c.Select("INBOX", &imap.SelectOptions{ReadOnly: true}).Wait()
+	// selectedMbox, err := c.Select("INBOX", nil).Wait()
 	if err != nil {
-		log.Fatalf("failed to select Archive: %v", err)
+		log.Fatalf("failed to select INBOX: %v", err)
 	}
-	log.Printf("Archive contains %v messages", selectedMbox.NumMessages)
+	log.Printf("INBOX contains %v messages", selectedMbox.NumMessages)
 
-	// Fetch first message in Archive
+	// Fetch first message in INBOX
 	if selectedMbox.NumMessages > 0 {
 		seqSet := imap.SeqSetNum(1)
 		messages, err := c.Fetch(seqSet, &imap.FetchOptions{
@@ -59,11 +70,6 @@ func main() {
 			log.Fatalf("failed to fetch first message in Archive: %v", err)
 		}
 		log.Printf("subject of first message in Archive: %v", messages[0].Envelope.Subject)
-	}
-
-	// Logout
-	if err := c.Logout().Wait(); err != nil {
-		log.Fatalf("failed to logout: %v", err)
 	}
 
 	// Check imap client state
