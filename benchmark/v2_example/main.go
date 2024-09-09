@@ -14,11 +14,14 @@ func main() {
 	// password := os.Getenv("YAHOO_APP_PASSWORD")
 	// username := os.Getenv("ICLOUD_EMAIL_ADDRESS")
 	// password := os.Getenv("ICLOUD_APP_PASSWORD")
-	username := os.Getenv("MCSPOWERMAIL_EMAIL_ADDRESS")
-	password := os.Getenv("MCSPOWERMAIL_PASSWORD")
+	// username := os.Getenv("MCSPOWERMAIL_EMAIL_ADDRESS")
+	// password := os.Getenv("MCSPOWERMAIL_PASSWORD")
+	username := os.Getenv("STARTMAIL_EMAIL_ADDRESS")
+	password := os.Getenv("STARTMAIL_PASSWORD")
 
 	// url := "imap.mail.me.com:993"
-	url := "mail.mcspowermail.com:993"
+	// url := "mail.mcspowermail.com:993"
+	url := "imap.startmail.com:993"
 
 	// Connect
 	option := &imapclient.Options{
