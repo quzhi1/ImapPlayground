@@ -2,7 +2,7 @@ module github.com/quzhi1/imap-playground
 
 go 1.20
 
-replace github.com/emersion/go-imap/v2 => ../go-imap
+// replace github.com/emersion/go-imap/v2 => ../go-imap
 
 require (
 	github.com/emersion/go-imap v1.2.1
