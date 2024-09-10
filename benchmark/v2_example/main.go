@@ -16,12 +16,15 @@ func main() {
 	// password := os.Getenv("ICLOUD_APP_PASSWORD")
 	// username := os.Getenv("MCSPOWERMAIL_EMAIL_ADDRESS")
 	// password := os.Getenv("MCSPOWERMAIL_PASSWORD")
-	username := os.Getenv("STARTMAIL_EMAIL_ADDRESS")
-	password := os.Getenv("STARTMAIL_PASSWORD")
+	// username := os.Getenv("STARTMAIL_EMAIL_ADDRESS")
+	// password := os.Getenv("STARTMAIL_PASSWORD")
+	username := os.Getenv("SITEGROUND_EMAIL_ADDRESS")
+	password := os.Getenv("SITEGROUND_PASSWORD")
 
 	// url := "imap.mail.me.com:993"
 	// url := "mail.mcspowermail.com:993"
-	url := "imap.startmail.com:993"
+	// url := "imap.startmail.com:993"
+	url := "uk49.siteground.eu:993"
 
 	// Connect
 	option := &imapclient.Options{
