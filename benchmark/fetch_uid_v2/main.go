@@ -129,6 +129,7 @@ func main() {
 		log.Printf("internalDate: %d", internalDate)
 		log.Printf("emlStr is empty? %t", emlStr == "")
 		log.Printf("messageID from envelope: %s", envelope.MessageID)
+		log.Printf("subject: %s", envelope.Subject)
 
 		// Read the eml string
 		emlStrReader := strings.NewReader(emlStr)
@@ -147,7 +148,7 @@ func main() {
 			}
 		}()
 
-		messageIdFromRawMimie := mailReader.Header.Header.Get("Message-ID")
+		messageIdFromRawMimie := mailReader.Header.Get("Message-ID")
 		log.Printf("messageID from raw mime: %s", messageIdFromRawMimie)
 	}
 }
