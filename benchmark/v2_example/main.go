@@ -16,21 +16,26 @@ func main() {
 	// password := os.Getenv("ICLOUD_APP_PASSWORD")
 	// username := os.Getenv("MCSPOWERMAIL_EMAIL_ADDRESS")
 	// password := os.Getenv("MCSPOWERMAIL_PASSWORD")
-	username := os.Getenv("STARTMAIL_EMAIL_ADDRESS")
-	password := os.Getenv("STARTMAIL_PASSWORD")
+	// username := os.Getenv("STARTMAIL_EMAIL_ADDRESS")
+	// password := os.Getenv("STARTMAIL_PASSWORD")
 	// username := os.Getenv("SITEGROUND_EMAIL_ADDRESS")
 	// password := os.Getenv("SITEGROUND_PASSWORD")
+	username := os.Getenv("NINJA_EMAIL_ADDRESS")
+	password := os.Getenv("NINJA_PASSWORD")
 
 	// url := "imap.mail.me.com:993"
 	// url := "mail.mcspowermail.com:993"
-	url := "imap.startmail.com:993"
+	// url := "imap.startmail.com:993"
 	// url := "uk49.siteground.eu:993"
+	url := "mail.nylas.ninja:143"
 
 	// Connect
-	option := &imapclient.Options{
-		DebugWriter: os.Stdout,
-	}
-	c, err := imapclient.DialTLS(url, option)
+	// option := &imapclient.Options{
+	// 	DebugWriter: os.Stdout,
+	// }
+	// c, err := imapclient.DialTLS(url, option)
+	// c, err := imapclient.DialStartTLS(url, option)
+	c, err := imapclient.DialInsecure(url, nil)
 	if err != nil {
 		log.Fatalf("failed to dial IMAP server: %v", err)
 	}
