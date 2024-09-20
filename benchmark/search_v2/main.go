@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"os"
-	"time"
 
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
@@ -15,14 +14,17 @@ import (
 var (
 	// username = os.Getenv("INTERMEDIA_EMAIL_ADDRESS")
 	// password = os.Getenv("INTERMEDIA_PASSWORD")
-	username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
-	password = os.Getenv("ICLOUD_APP_PASSWORD")
+	// username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
+	// password = os.Getenv("ICLOUD_APP_PASSWORD")
+	username = os.Getenv("CHINESE_263_EMAIL_ADDRESS")
+	password = os.Getenv("CHINESE_263_PASSWORD")
 )
 
 const (
 	// imapAddress = "west.EXCH092.serverdata.net:993"
-	imapAddress = "imap.mail.me.com:993"
-	folderName  = "Drafts"
+	// imapAddress = "imap.mail.me.com:993"
+	imapAddress = "imapw.263.net:993"
+	folderName  = "INBOX"
 )
 
 func main() {
@@ -37,7 +39,8 @@ func main() {
 
 	// Connect to imap server
 	imapClient, err := imapclient.DialTLS(imapAddress, &imapclient.Options{
-		TLSConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec // We support self signed imap server
+		DebugWriter: os.Stderr,
+		TLSConfig:   &tls.Config{InsecureSkipVerify: true}, //nolint:gosec // We support self signed imap server
 	})
 	if err != nil {
 		panic(err)
@@ -59,13 +62,14 @@ func main() {
 
 	// Search for messages in the last 90 days
 	criteria := imap.SearchCriteria{
-		SentSince: time.Now().AddDate(0, 0, -90),
+		// SentSince: time.Now().AddDate(0, 0, -90),
 	}
-	log.Ctx(ctx).Debug().
-		Str("folderName", folderName).
-		Any("criteria", criteria).
-		Msg("Searching folder")
+	// log.Ctx(ctx).Debug().
+	// 	Str("folderName", folderName).
+	// 	Any("criteria", criteria).
+	// 	Msg("Searching folder")
 	searchResponses, err := imapClient.UIDSearch(&criteria, nil).Wait()
+	// searchResponses, err := imapClient.UIDSearch(nil, nil).Wait()
 	if err != nil {
 		panic(err)
 	}
