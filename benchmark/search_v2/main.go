@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"os"
+	"time"
 
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
@@ -62,7 +63,7 @@ func main() {
 
 	// Search for messages in the last 90 days
 	criteria := imap.SearchCriteria{
-		// SentSince: time.Now().AddDate(0, 0, -90),
+		SentSince: time.Now().AddDate(0, 0, -90),
 	}
 	// log.Ctx(ctx).Debug().
 	// 	Str("folderName", folderName).
