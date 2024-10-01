@@ -20,22 +20,25 @@ func main() {
 	// password := os.Getenv("STARTMAIL_PASSWORD")
 	// username := os.Getenv("SITEGROUND_EMAIL_ADDRESS")
 	// password := os.Getenv("SITEGROUND_PASSWORD")
-	username := os.Getenv("NINJA_EMAIL_ADDRESS")
-	password := os.Getenv("NINJA_PASSWORD")
+	// username := os.Getenv("NINJA_EMAIL_ADDRESS")
+	// password := os.Getenv("NINJA_PASSWORD")
+	username := os.Getenv("CENTURY_EMAIL_ADDRESS")
+	password := os.Getenv("CENTURY_PASSWORD")
 
 	// url := "imap.mail.me.com:993"
 	// url := "mail.mcspowermail.com:993"
 	// url := "imap.startmail.com:993"
 	// url := "uk49.siteground.eu:993"
-	url := "mail.nylas.ninja:143"
+	// url := "mail.nylas.ninja:143"
+	url := "mail.centurylink.net:993"
 
 	// Connect
-	// option := &imapclient.Options{
-	// 	DebugWriter: os.Stdout,
-	// }
-	// c, err := imapclient.DialTLS(url, option)
+	option := &imapclient.Options{
+		DebugWriter: os.Stdout,
+	}
+	c, err := imapclient.DialTLS(url, option)
 	// c, err := imapclient.DialStartTLS(url, option)
-	c, err := imapclient.DialInsecure(url, nil)
+	// c, err := imapclient.DialInsecure(url, nil)
 	if err != nil {
 		log.Fatalf("failed to dial IMAP server: %v", err)
 	}
@@ -82,6 +85,13 @@ func main() {
 		}
 		log.Printf("subject of first message in Archive: %v", messages[0].Envelope.Subject)
 	}
+
+	// Search all
+	searchData, err := c.UIDSearch(&imap.SearchCriteria{}, nil).Wait()
+	if err != nil {
+		log.Fatalf("failed to search all: %v", err)
+	}
+	log.Println("Found messages:", searchData.AllUIDs())
 
 	// Check imap client state
 	log.Println("IMAP client state:", c.State())

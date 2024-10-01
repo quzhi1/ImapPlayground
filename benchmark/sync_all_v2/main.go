@@ -16,13 +16,16 @@ import (
 var (
 	// username = os.Getenv("INTERMEDIA_EMAIL_ADDRESS")
 	// password = os.Getenv("INTERMEDIA_PASSWORD")
-	username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
-	password = os.Getenv("ICLOUD_APP_PASSWORD")
+	// username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
+	// password = os.Getenv("ICLOUD_APP_PASSWORD")
+	username = os.Getenv("CENTURY_EMAIL_ADDRESS")
+	password = os.Getenv("CENTURY_PASSWORD")
 )
 
 const (
 	// imapAddress = "west.EXCH092.serverdata.net:993"
-	imapAddress          = "imap.mail.me.com:993"
+	// imapAddress          = "imap.mail.me.com:993"
+	imapAddress          = "mail.centurylink.net:993"
 	HTMLContentType      = "text/html"
 	PlainTextContentType = "text/plain"
 	multipartError       = "multipart:"
@@ -65,7 +68,7 @@ func main() {
 			ReadOnly: true,
 		}).Wait()
 		if err != nil {
-			panic(err)
+			panic("error selecting " + folder.Mailbox + " " + err.Error())
 		}
 
 		// Search for messages in the last 7 days
@@ -130,7 +133,10 @@ func loadMsgs(ctx context.Context, imapClient *imapclient.Client, uids []imap.UI
 			switch item := item.(type) {
 			case imapclient.FetchItemDataEnvelope:
 				// log.Ctx(ctx).Debug().Any("from", item.Envelope.From).Msg("Reading envelope")
-				log.Ctx(ctx).Debug().Str("message_id", item.Envelope.MessageID).Msg("Reading message ID")
+				log.Ctx(ctx).Debug().
+					Str("message_id", item.Envelope.MessageID).
+					Str("subject", item.Envelope.Subject).
+					Msg("Reading message ID")
 			case imapclient.FetchItemDataBodySection:
 				// b, err := io.ReadAll(item.Literal)
 				// if err != nil {
