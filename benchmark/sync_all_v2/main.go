@@ -48,10 +48,10 @@ func main() {
 	// Connect to imap server
 	var uint16CipherSuites = []uint16{}
 	for _, suite := range tls.CipherSuites() {
-		uint16CipherSuites = append(uint16CipherSuites, uint16(suite.ID))
+		uint16CipherSuites = append(uint16CipherSuites, suite.ID)
 	}
 	for _, suite := range tls.InsecureCipherSuites() {
-		uint16CipherSuites = append(uint16CipherSuites, uint16(suite.ID))
+		uint16CipherSuites = append(uint16CipherSuites, suite.ID)
 	}
 
 	imapClient, err := imapclient.DialTLS(imapAddress, &imapclient.Options{
