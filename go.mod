@@ -1,6 +1,6 @@
 module github.com/quzhi1/imap-playground
 
-go 1.20
+go 1.22
 
 // replace github.com/emersion/go-imap/v2 => ../go-imap
 

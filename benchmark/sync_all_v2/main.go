@@ -18,14 +18,17 @@ var (
 	// password = os.Getenv("INTERMEDIA_PASSWORD")
 	// username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
 	// password = os.Getenv("ICLOUD_APP_PASSWORD")
-	username = os.Getenv("CENTURY_EMAIL_ADDRESS")
-	password = os.Getenv("CENTURY_PASSWORD")
+	// username = os.Getenv("CENTURY_EMAIL_ADDRESS")
+	// password = os.Getenv("CENTURY_PASSWORD")
+	username = os.Getenv("SGSD_EMAIL_ADDRESS")
+	password = os.Getenv("SGSD_PASSWORD")
 )
 
 const (
 	// imapAddress = "west.EXCH092.serverdata.net:993"
-	// imapAddress          = "imap.mail.me.com:993"
-	imapAddress          = "mail.centurylink.net:993"
+	// imapAddress = "imap.mail.me.com:993"
+	// imapAddress          = "mail.centurylink.net:993"
+	imapAddress          = "mail.sgsd.jobs:993"
 	HTMLContentType      = "text/html"
 	PlainTextContentType = "text/plain"
 	multipartError       = "multipart:"
@@ -43,8 +46,20 @@ func main() {
 	ctx := logger.WithContext(context.Background())
 
 	// Connect to imap server
+	var uint16CipherSuites = []uint16{}
+	for _, suite := range tls.CipherSuites() {
+		uint16CipherSuites = append(uint16CipherSuites, uint16(suite.ID))
+	}
+	for _, suite := range tls.InsecureCipherSuites() {
+		uint16CipherSuites = append(uint16CipherSuites, uint16(suite.ID))
+	}
+
 	imapClient, err := imapclient.DialTLS(imapAddress, &imapclient.Options{
-		TLSConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec // We support self signed imap server
+		TLSConfig: &tls.Config{
+			InsecureSkipVerify: true,
+			CipherSuites:       uint16CipherSuites,
+		}, //nolint:gosec // We support self signed imap server
+		DebugWriter: os.Stderr,
 	})
 	if err != nil {
 		panic(err)
