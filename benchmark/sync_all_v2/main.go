@@ -28,7 +28,8 @@ const (
 	// imapAddress = "west.EXCH092.serverdata.net:993"
 	// imapAddress = "imap.mail.me.com:993"
 	// imapAddress          = "mail.centurylink.net:993"
-	imapAddress          = "mail.sgsd.jobs:993"
+	// imapAddress          = "mail.sgsd.jobs:993"
+	imapAddress          = "in.titanka.com:993"
 	HTMLContentType      = "text/html"
 	PlainTextContentType = "text/plain"
 	multipartError       = "multipart:"
@@ -46,24 +47,45 @@ func main() {
 	ctx := logger.WithContext(context.Background())
 
 	// Connect to imap server
-	var uint16CipherSuites = []uint16{}
-	for _, suite := range tls.CipherSuites() {
-		uint16CipherSuites = append(uint16CipherSuites, suite.ID)
-	}
-	for _, suite := range tls.InsecureCipherSuites() {
-		uint16CipherSuites = append(uint16CipherSuites, suite.ID)
-	}
-
+	// Default method.
+	log.Ctx(ctx).Debug().Str("imapAddress", imapAddress).Msg("Connecting to IMAP server")
 	imapClient, err := imapclient.DialTLS(imapAddress, &imapclient.Options{
 		TLSConfig: &tls.Config{
-			InsecureSkipVerify: true,
-			CipherSuites:       uint16CipherSuites,
-		}, //nolint:gosec // We support self signed imap server
+			InsecureSkipVerify: true, //nolint:gosec // We support self signed imap server
+			CipherSuites:       allCipherSuites(),
+		},
 		DebugWriter: os.Stderr,
 	})
+	// Fallback to StartTLS command method.
+	if err != nil {
+		log.Ctx(ctx).Warn().Err(err).Msg("Failed to connect to IMAP server using TLS. Fallback to StartTLS")
+		imapClient, err = imapclient.DialStartTLS(imapAddress, &imapclient.Options{
+			TLSConfig: &tls.Config{
+				InsecureSkipVerify: true, //nolint:gosec // We support self signed imap server
+				CipherSuites:       allCipherSuites(),
+			},
+		})
+	}
+	// Fallback to insecure method.
+	if err != nil {
+		log.Ctx(ctx).Warn().Err(err).Msg("Falling back to insecure connection")
+		imapClient, err = imapclient.DialInsecure(imapAddress, &imapclient.Options{
+			TLSConfig: &tls.Config{
+				InsecureSkipVerify: true, //nolint:gosec // We support self signed imap server
+				CipherSuites:       allCipherSuites(),
+			},
+		})
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	// Verify connection works
+	capSet, err := imapClient.Capability().Wait()
 	if err != nil {
 		panic(err)
 	}
+	log.Ctx(ctx).Debug().Any("capabilities", capSet).Msg("IMAP server capabilities")
 
 	// Login
 	if err := imapClient.Login(username, password).Wait(); err != nil {
@@ -167,4 +189,17 @@ func loadMsgs(ctx context.Context, imapClient *imapclient.Client, uids []imap.UI
 			}
 		}
 	}
+}
+
+// allCipherSuites returns all ciphers supported by the Go standard library.
+// It includes both secure and insecure ciphers.
+func allCipherSuites() []uint16 {
+	var uint16CipherSuites = []uint16{}
+	for _, suite := range tls.CipherSuites() {
+		uint16CipherSuites = append(uint16CipherSuites, suite.ID)
+	}
+	for _, suite := range tls.InsecureCipherSuites() {
+		uint16CipherSuites = append(uint16CipherSuites, suite.ID)
+	}
+	return uint16CipherSuites
 }
