@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"os"
-	"time"
 
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
@@ -15,17 +14,17 @@ import (
 var (
 	// username = os.Getenv("INTERMEDIA_EMAIL_ADDRESS")
 	// password = os.Getenv("INTERMEDIA_PASSWORD")
-	// username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
-	// password = os.Getenv("ICLOUD_APP_PASSWORD")
-	username = os.Getenv("CHINESE_263_EMAIL_ADDRESS")
-	password = os.Getenv("CHINESE_263_PASSWORD")
+	username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
+	password = os.Getenv("ICLOUD_APP_PASSWORD")
+	// username = os.Getenv("CHINESE_263_EMAIL_ADDRESS")
+	// password = os.Getenv("CHINESE_263_PASSWORD")
 )
 
 const (
 	// imapAddress = "west.EXCH092.serverdata.net:993"
-	// imapAddress = "imap.mail.me.com:993"
-	imapAddress = "imapw.263.net:993"
-	folderName  = "INBOX"
+	imapAddress = "imap.mail.me.com:993"
+	// imapAddress = "imapw.263.net:993"
+	folderName = "INBOX"
 )
 
 func main() {
@@ -63,7 +62,13 @@ func main() {
 
 	// Search for messages in the last 90 days
 	criteria := imap.SearchCriteria{
-		SentSince: time.Now().AddDate(0, 0, -90),
+		// SentSince: time.Now().AddDate(0, 0, -90),
+		Header: []imap.SearchCriteriaHeaderField{
+			{
+				Key:   "To",
+				Value: "quzhi65222714@icloud.com",
+			},
+		},
 	}
 	// log.Ctx(ctx).Debug().
 	// 	Str("folderName", folderName).
