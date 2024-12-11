@@ -51,7 +51,7 @@ a STATUS INBOX (MESSAGES)
 a STATUS Archive (MESSAGES)
 # List all UIDs
 a uid search all
-a uid search SENTSINCE 01-March-2024
+a uid search SENTSINCE 01-Mar-2024
 a uid search NOT TEXT Zhi
 # Change flags
 a STORE 1 +FLAGS (\abc)
