@@ -22,8 +22,10 @@ var (
 	// password = os.Getenv("CENTURY_PASSWORD")
 	// username = os.Getenv("SGSD_EMAIL_ADDRESS")
 	// password = os.Getenv("SGSD_PASSWORD")
-	username = os.Getenv("LEIPZIG_EMAIL_ADDRESS")
-	password = os.Getenv("LEIPZIG_PASSWORD")
+	// username = os.Getenv("LEIPZIG_EMAIL_ADDRESS")
+	// password = os.Getenv("LEIPZIG_PASSWORD")
+	username = os.Getenv("MAILO_EMAIL_ADDRESS")
+	password = os.Getenv("MAILO_PASSWORD")
 )
 
 const (
@@ -32,7 +34,8 @@ const (
 	// imapAddress          = "mail.centurylink.net:993"
 	// imapAddress          = "mail.sgsd.jobs:993"
 	// imapAddress          = "in.titanka.com:993"
-	imapAddress          = "mail.leipzig.a14.de:993"
+	// imapAddress          = "mail.leipzig.a14.de:993"
+	imapAddress          = "mail.mailo.com:993"
 	HTMLContentType      = "text/html"
 	PlainTextContentType = "text/plain"
 	multipartError       = "multipart:"
