@@ -14,28 +14,12 @@ import (
 )
 
 var (
-	// username = os.Getenv("INTERMEDIA_EMAIL_ADDRESS")
-	// password = os.Getenv("INTERMEDIA_PASSWORD")
-	// username = os.Getenv("ICLOUD_EMAIL_ADDRESS")
-	// password = os.Getenv("ICLOUD_APP_PASSWORD")
-	// username = os.Getenv("CENTURY_EMAIL_ADDRESS")
-	// password = os.Getenv("CENTURY_PASSWORD")
-	// username = os.Getenv("SGSD_EMAIL_ADDRESS")
-	// password = os.Getenv("SGSD_PASSWORD")
-	// username = os.Getenv("LEIPZIG_EMAIL_ADDRESS")
-	// password = os.Getenv("LEIPZIG_PASSWORD")
-	username = os.Getenv("MAILO_EMAIL_ADDRESS")
-	password = os.Getenv("MAILO_PASSWORD")
+	username = os.Getenv("SSI_EMAIL_ADDRESS")
+	password = os.Getenv("SSI_PASSWORD")
 )
 
 const (
-	// imapAddress = "west.EXCH092.serverdata.net:993"
-	// imapAddress = "imap.mail.me.com:993"
-	// imapAddress          = "mail.centurylink.net:993"
-	// imapAddress          = "mail.sgsd.jobs:993"
-	// imapAddress          = "in.titanka.com:993"
-	// imapAddress          = "mail.leipzig.a14.de:993"
-	imapAddress          = "mail.mailo.com:993"
+	imapAddress          = "email.sscihosting.com:993"
 	HTMLContentType      = "text/html"
 	PlainTextContentType = "text/plain"
 	multipartError       = "multipart:"
