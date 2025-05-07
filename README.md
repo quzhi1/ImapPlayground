@@ -9,11 +9,17 @@ export YAHOO_EMAIL_ADDRESS=<your-email-address>
 export YAHOO_APP_PASSWORD=<your-app-password>
 ```
 
-## Talk to Yahoo IMAP server
+## Connect and log into Yahoo IMAP server
 ```bash
 openssl s_client -connect imap.mail.yahoo.com:993 -crlf -quiet
 # Command line will hang
 a login <your-email-address> <your-app-password>
+```
+
+## Connect and log into other IMAP servers
+```bash
+openssl s_client -connect <imap-host>:<imap-port> -starttls imap -crlf -quiet -ign_eof # With startTLS
+openssl s_client -connect <imap-host>:<imap-port> -crlf -quiet # No startTLS
 ```
 
 ## Create a user in local IMAP
@@ -27,9 +33,10 @@ curl -L -X POST 'localhost:8080/api/user' \
 }'
 ```
 
-## Talk to local IMAP server
+## Connect and log into local IMAP server
 ```bash
 openssl s_client -connect localhost:3993 -crlf -quiet
+
 # Command line will hang
 a login test@localhost test
 a login user-a@localhost user-a
