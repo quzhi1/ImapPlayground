@@ -58,8 +58,12 @@ a STATUS INBOX (MESSAGES)
 a STATUS Archive (MESSAGES)
 # List all UIDs
 a uid search all
+# Search with time window
 a uid search SENTSINCE 01-Mar-2024
+# Search with exclusion filter
 a uid search NOT TEXT Zhi
+# Search by Message-ID header
+a uid search HEADER Message-ID "<message-id-value>"
 # Change flags
 a STORE 1 +FLAGS (\abc)
 # Check last 10 messages
